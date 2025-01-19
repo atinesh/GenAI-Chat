@@ -1,0 +1,51 @@
+
+networks:
+  genai_chat_net:
+    external: true
+
+services:
+
+  nginx:
+    image: nginx-base
+    container_name: "nginx"
+    ports:
+      - 8080:80
+    networks:
+      - genai_chat_net
+    depends_on:
+      - genai-chat-backend
+
+  genai-chat-backend:
+    image: genai-chat-backend
+    container_name: 'genai-chat-backend' 
+    restart: always
+    ports:
+      - 5000:5000
+    command: ["/bin/sh", "-c","python3 app.py"]
+    env_file:
+      - ".env"
+    deploy:
+      resources:
+        limits:
+          #cpu: "2"
+          memory: 2048M
+    networks:
+      - genai_chat_net
+
+  redis-stack:
+    image: redis/redis-stack:latest # Provides both Redis Stack Server and RedisInsight. This container is best for LOCAL DEPLOYMENT because you can use the embedded RedisInsight to visualize your data.
+    # image: redis/redis-stack-server:latest # Provides Redis Stack Server only. This container is best for PRODUCTION DEPLOYMENT.
+    container_name: "redis-stack"
+    restart: always
+    ports:
+      - 6379:6379
+      - 8001:8001 # RedisInsight
+    volumes:
+      - ./data:/data # Stores redis dump file in projects root data folder
+    deploy:
+      resources:
+        limits:
+          #cpu: "2"
+          memory: 2048M
+    networks:
+      - genai_chat_net

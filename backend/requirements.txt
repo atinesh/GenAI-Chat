@@ -1,0 +1,12 @@
+Flask
+gunicorn
+flask-restx
+Flask-Cors
+openai
+redis
+numpy
+langchain
+langchain-community
+tiktoken
+sentence-transformers
+transformers

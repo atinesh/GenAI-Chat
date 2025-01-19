@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"> -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .chat-log {
+            /* border: 1px solid #ccc; */
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            height: 500px;
+            overflow-y: auto;
+            position: relative; /* Add this line to make the chat-log relative */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Default alignment for other content */
+            /* border-radius: 10px; */
+        }
+        .chat-log p {
+            margin: 5px 0;
+        }
+        .chat-log .question {
+            background-color: #dadada;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block; /* Make the background span only the text */
+            text-align: left;      /* Align text within the block */
+            font-size: 14px;
+            margin-left: auto;     /* Push the question to the right */
+            margin-right: 0;       /* No margin on the right */
+        }
+        .chat-log .answer {
+            /* background-color: #ffffff; */
+            padding: 5px;
+            display: inline-block;
+            text-align: left;
+            font-size: 14px;
+        }
+        .chat-log .source {
+            /* background-color: #ffffff; */
+            padding: 5px;
+            font-size: 12px;
+        }
+        .highlight {
+            background-color: #ebebeb; /* Gold color for highlighting */
+            padding: 2px 6px; /* Padding for spacing inside the highlight */
+            border-radius: 6px; /* Rounded corners */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .loading {
+            text-align: left; /* Center the spinner */
+            margin-top: 10px; /* Move the spinner below the chat log */
+            display: none;
+            width: 200px;
+            font-size: 14px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 600px; /* Increased width */
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .modal label {
+            margin-top: 10px;
+        }
+        .modal button {
+            margin-top: 10px;
+        }
+        .btn {
+            background-color: light-gray;
+            padding: 12px 16px;
+            font-size: 14px;
+            border-radius: 8px; /* Added rounded corners */
+            cursor: pointer; /* Hand cursor on hover */
+        }
+        .btn:hover {
+            background-color: rgb(170, 170, 170);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>GenAI Chatbot    <i class='fas fa-robot' style='font-size:36px'></i></h1>
+        <h4>Ask me anything! I can assist you in finding answers from the documents.</h4>
+        <div class="chat-log" id="chatLog">
+            <!-- Chat log will appear here -->
+        </div>
+        <div class="loading" id="loading">Processing Request <i class="fas fa-spinner fa-pulse"></i></div>
+        <br/>
+        <label for="question">Question:</label>
+        <input type="text" id="question" placeholder="Enter your question"><br/>
+        <button class="btn" onclick="submitQuestion()"><i class="fas fa-arrow-right"></i> Submit</button>
+        <button class="btn" onclick="clearChatLog()"><i class="fas fa-refresh"></i> Clear Chat</button>
+        <button class="btn" onclick="openSettings()"><i class="fas fa-gear"></i> Settings</button>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="settingsModal">
+        <h2>Settings</h2>
+
+        <label for="objective">Objective:</label>
+        <textarea id="objective" style="width: 580px; font-size: 14px;" rows="5" placeholder="Enter the objective">You are an AI assistant that helps users by answering their questions. Use only the provided information to answer the question.</textarea>
+
+        <label for="index">Index:</label>
+        <input type="text" id="index" style="width: 250px; font-size: 14px;" placeholder="Enter the index" value="test_index_1">
+
+        <label for="source">Source Filtering:</label>
+        <label for="source">
+            <input type="checkbox" id="smart_src_filter" name="smart_src_filter" checked>
+            Smart Source Filtering
+        </label>
+        <label for="note" style="font-size: 12px; color: #969696;">Smart Source Filtering feature is experimental and may not always work as expected.</label>
+        
+        <label for="sessionId" style="visibility: hidden;">Session ID:</label>
+        <input type="text" id="sessionId" style="width: 250px; visibility: hidden;" placeholder="Enter the session ID" readonly>
+        <br/>
+      
+        <button class="btn" onclick="closeSettings()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <script>
+        const chatLog = document.getElementById('chatLog');
+        const loadingIndicator = document.getElementById('loading');
+        const settingsModal = document.getElementById('settingsModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+
+        function generateSessionId() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
+
+        function initializeSession() {
+            const sessionIdInput = document.getElementById('sessionId');
+            sessionIdInput.value = generateSessionId();
+        }
+
+        function submitQuestion() {
+            const question = document.getElementById('question').value;
+            const objective = document.getElementById('objective').value;
+            const index = document.getElementById('index').value;
+            const sessionId = document.getElementById('sessionId').value;
+            const smart_src_filter = document.getElementById('smart_src_filter');
+
+            const data = {
+                question: question,
+                objective: objective,
+                index: index,
+                session_id: sessionId,
+                smart_src_filter: smart_src_filter.checked
+            };
+
+            loadingIndicator.style.display = 'block';
+
+            fetch('http://localhost:8080/api/v1/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text()) // Assume the response is a plain string
+            .then(answer => {
+                loadingIndicator.style.display = 'none';
+                displayChat(question, answer);
+            })
+            .catch(error => {
+                loadingIndicator.style.display = 'none';
+                console.error('Error:', error);
+            });
+        }
+
+        function displayChat(question, answer) {
+            // Question 
+            const questionElem = document.createElement('p');
+            questionElem.textContent = `${question}`;
+            questionElem.className = 'question';
+            chatLog.appendChild(questionElem);
+            
+            // Answer
+            const answerText = answer.replace(/\[SOURCE:.*?\]/i, '').trim().slice(1, -1);
+            const answerElem = document.createElement('p');
+            answerElem.textContent = `${answerText}`;
+            answerElem.className = 'answer';
+            chatLog.appendChild(answerElem);
+
+            // Source
+            const sourceMatch = answer.match(/\[SOURCE:\s*(.*?)\]/i);
+            const source = sourceMatch ? sourceMatch[1].trim() : 'Unknown';
+ 
+            // Only show source if it's not "None"
+            if (source !== 'None' && source !== 'Unknown') {
+                const sourceElem = document.createElement('p');
+                const sourceFiles = source.split('|').map(file => file.trim());
+                sourceElem.innerHTML = '<b>Source</b>: ' + sourceFiles.map(file => {
+                    return `<span class="highlight">${file}</span>`;
+                }).join(' '); // Join filenames with a space
+                sourceElem.className = 'source';
+                chatLog.appendChild(sourceElem);
+            }
+
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function clearChatLog() {
+            chatLog.innerHTML = '';
+            initializeSession();
+        }
+
+        function openSettings() {
+            settingsModal.style.display = 'block';
+            modalOverlay.style.display = 'block';
+        }
+
+        function closeSettings() {
+            settingsModal.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
+
+        // Initialize session ID on page load
+        document.addEventListener('DOMContentLoaded', initializeSession);
+    </script>
+
+</body>
+</html>

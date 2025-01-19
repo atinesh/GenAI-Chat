@@ -1,0 +1,8 @@
+# Ignore environment files
+.env
+
+# Ignore redis dump
+*.rdb
+
+# Ignore model file
+backend/model/model.safetensors
