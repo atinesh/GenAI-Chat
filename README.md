@@ -13,7 +13,7 @@ Technology Used:
 
 [![My Skills](https://skillicons.dev/icons?i=python,pytorch,flask,html,nginx,docker,redis,aws,azure,openai)](https://skillicons.dev)
 
-For more detailed explanation of this project, including its design and implementation, check out the accompanying [Medium blog post](https://medium.com/).
+For more detailed explanation of this project, including its design and implementation, check out the accompanying [Medium blog post](https://atinesh.medium.com/building-a-retrieval-augmented-generation-rag-chatbot-9a86c5b05691).
 
 ## 🔎 System Architecture
 
@@ -22,7 +22,7 @@ The chatbot consists of these core components:
 - **Frontend**: Takes user queries and sends them to the backend. It's built with HTML + JavaScript and is running in a **Docker** container with **Nginx**.
 - **Backend:** Takes user queries, fetches relevant documents from Redis Vector DB, builds prompts, and sends them to the LLM for generating response. Its built with **Flask** and is running in a **Docker** container.
 - **Redis Vector Database:** Stores the document text, embedding vectors and session data. It’s also running in a **Docker** container.
-- **OpenAI LLM**: Takes prompt and generates response. We will be using `gpt-4o` model for generating response and `text-embedding-3-small` model for generating embedding vectors (embedding dimension 1536). These models are hosted in cloud Chatbot makes API call in order to communicate with the models. These models can be updated in `backend/common/config.py`.
+- **OpenAI LLM**: Takes prompt and generates response. We will be using `gpt-4o` model for generating response and `text-embedding-3-small` model for generating embedding vectors (embedding dimension 1536). These models are hosted in cloud Chatbot makes API call in order to communicate with the models. These models can be updated in `backend/config.py`.
 
 <img src="data_indexing/images/genai_chat.png" alt="GenAI Chat" width="800" style="border-radius: 10px;">
 
@@ -34,7 +34,7 @@ Follow below steps in either on Mac and Linux (Ubuntu) machine.
 
 **Step 2**: Clone the repository
 ```
-$ git clone https://github.com/your-repo
+$ git clone https://github.com/atinesh-s/GenAI-Chat.git
 ```
 
 **Step 3**: Configure OpenAI credentials
@@ -48,20 +48,25 @@ $ git clone https://github.com/your-repo
 OPENAI_API_KEY=key
 ```
 
-**Step 4**: Download the `model.safetensors` file from this [link](https://www.dropbox.com/scl/fi/310abl0pqs0hcxmqmiz70/model.safetensors?rlkey=yadhs2nemgt2lsighd1oufd2g&st=d9txrq8d&dl=0) and place it in the `backend/model` directory.
+**Step 4**: Create a `data` directory in the project root if it doesn't already exist. This directory will be used to store the Redis dump file.
 
-**Step 5**: Build Images and Run Containers
+```
+$ cd GenAI-Chat
+$ mkdir data
+```
+
+**Step 5**: Download the `model.safetensors` file from this [link](https://www.dropbox.com/scl/fi/310abl0pqs0hcxmqmiz70/model.safetensors?rlkey=yadhs2nemgt2lsighd1oufd2g&st=d9txrq8d&dl=0) and place it in the `backend/model` directory.
+
+**Step 6**: Build Images and Run Containers
 
 ```
 $ cd GenAI-Chat
 $ ./deploy.sh
 ```
 
-> Note: While building the image genai-chat-backend the installation of torch library might take some time depending on the internet connection speed.
+**Step 7**: Index the data into Redis by following the instructions provided in the [README.md](/data_indexing/README.md) file.
 
-**Step 6**: Index the data into Redis by following the instructions provided in the [README.md](/data_indexing/README.md) file.
-
-**Step 7**: Once indexing is complete, you can interact with the frontend by visiting http://localhost:8080/.
+**Step 8**: Once indexing is complete, you can interact with the frontend by visiting http://localhost:8080/.
 
 > Note: RedisInsight can be accessed at http://localhost:8001/
 
