@@ -4,5 +4,7 @@ pypdf
 python-docx
 openai
 numpy
+pandas
+openpyxl
 redis
 tqdm

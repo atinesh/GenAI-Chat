@@ -9,7 +9,7 @@ app.logger.setLevel(logging.INFO)
 app.logger.info("Welcome to Generative AI Chat!")
 
 # Create an instance of the Flask-RESTX API
-api = Api(app, version='1.0', title='Generative AI Chat', description='Generative AI Chat')
+api = Api(app, version='1.1', title='Generative AI Chat', description='Generative AI Chat')
 
 # Create a Flask-RESTX Namespace
 genai_namespace = api.namespace('api/v1', description='')
