@@ -1,5 +1,6 @@
 # Import Libraries
 from langchain.text_splitter import CharacterTextSplitter
+from langchain_text_splitters import RecursiveJsonSplitter
 from datetime import datetime, timedelta
 from tqdm import tqdm
 from pypdf import PdfReader
@@ -7,8 +8,10 @@ from docx import Document
 import openai
 from openai import OpenAI
 import numpy as np
+import pandas as pd
 import glob
 import json
+import csv
 import sys
 import io
 import os
@@ -42,33 +45,64 @@ redis_client = redis.Redis(host="localhost", port=6379)
 
 # Parameters
 DOC_PREFIX = "doc:"                         # RediSearch Key Prefix for the Index
-EMBEDDING_MODEL = "text-embedding-3-small"  # Embedding model
-EMBEDDING_DIMENSIONS = 1536                 # Embedding dimensions
+EMBEDDING_MODEL = "text-embedding-3-large"  # Embedding model
+EMBEDDING_DIMENSIONS = 3072                 # Embedding dimensions
 CHUNK_SIZE = 5000                           # Maximum number of characters in each chunk 
                                             # 5000 characters ~ 800 Words ~ 1000 Tokens
-CHUNK_OVERLAP = 20                          # Overlap between chunks
+CHUNK_OVERLAP = 200                         # Overlap between chunks
 
 # Helper Functions
 def get_embedding(text):
-   text = text.replace("\n", " ")
-   return openai_client.embeddings.create(input = [text], model = EMBEDDING_MODEL).data[0].embedding
+    text = text.replace("\n", " ")
+    return openai_client.embeddings.create(input = [text], model = EMBEDDING_MODEL).data[0].embedding
 
 def split_text(doc_text):
+
+    try:
     
-    # Create an instance of CharacterTextSplitter
-    text_splitter = CharacterTextSplitter(
-        chunk_size    = CHUNK_SIZE,
-        chunk_overlap = CHUNK_OVERLAP
-    )
-    
-    # Split the text
-    chunks = text_splitter.split_text(doc_text)
+        # Create an instance of CharacterTextSplitter
+        text_splitter = CharacterTextSplitter(
+            chunk_size    = CHUNK_SIZE,
+            chunk_overlap = CHUNK_OVERLAP
+        )
+        # Split the text
+        chunks = text_splitter.split_text(doc_text)
+
+    except Exception as e:
+        print(f"Error while splitting text: {str(e)}")
+        return []
     
     # Display the resulting chunks
     # for i, chunk in enumerate(chunks):
     #     print(f"Chunk {i+1}:\n{chunk}\n")
 
     return chunks
+
+def split_json(doc_json):
+    
+    try:
+
+        # Create an instance of RecursiveJsonSplitter
+        json_splitter = RecursiveJsonSplitter(
+            max_chunk_size = CHUNK_SIZE
+        )
+        # Split the JSON
+        chunks = json_splitter.split_json(json_data=doc_json)
+
+        # Convert chunk from dict to string
+        nchunks = []
+        for chunk in chunks:
+            nchunks.append(json.dumps(chunk, ensure_ascii=False)) 
+
+    except Exception as e:
+        print(f"Error while splitting JSON: {str(e)}")
+        return []
+
+    # Display the resulting chunks
+    # for i, chunk in enumerate(nchunks):
+    #     print(f"Chunk {i+1}:\n{chunk}\n")
+
+    return nchunks
 
 def create_index(index_name):
     try:
@@ -109,7 +143,7 @@ def insert_index(filename, source, doc_chunks, index_name):
         for chunk in doc_chunks:
             chunk_vector = np.array(get_embedding(chunk), dtype=np.float32).tobytes()
             chunks_vec.append(chunk_vector)
-        #print(len(chunks_vec))
+        # print(len(chunks_vec))
         
         # Write to Redis
         pipe = redis_client.pipeline()
@@ -131,6 +165,129 @@ def insert_index(filename, source, doc_chunks, index_name):
     except Exception as e:
         print(str(e))
 
+def read_txt(file_path, local=True):
+    '''
+    Reads Text file
+    '''
+    doc_chunks = []
+    try:
+        # Extract text
+        if local:
+            with open(file_path, "r") as file:
+                doc_text = file.read()
+        else:
+            doc_text = file_path.decode('utf-8')
+
+        # Split Text
+        doc_chunks = split_text(doc_text)
+        # print(f"No. of Chunks: {len(doc_chunks)}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+    return doc_chunks
+
+def read_pdf(file_path):
+    '''
+    Reads PDF file
+    '''
+    doc_chunks = []
+    try:
+        # Extract text
+        reader = PdfReader(file_path)
+        doc_text = "\n".join([reader.pages[i].extract_text() for i in range(len(reader.pages))])
+        # Split Text
+        doc_chunks = split_text(doc_text)
+        # print(f"No. of Chunks: {len(doc_chunks)}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+    return doc_chunks
+
+def read_docx(file_path):
+    '''
+    Reads DOCX file
+    '''
+    doc_chunks = []
+    try:
+        # Extract text
+        doc = Document(file_path)
+        doc_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+        # Split Text
+        doc_chunks = split_text(doc_text)
+        # print(f"No. of Chunks: {len(doc_chunks)}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+    return doc_chunks
+
+def read_json(file_path, local=True):
+    '''
+    Reads JSON file
+    '''
+    doc_chunks = []
+    try:
+        # Extract text
+        if local:
+            with open(file_path, 'r') as file:
+                doc_text = json.load(file)
+        else:
+            doc_text = json.loads(file_path)
+            
+        # Split Text
+        doc_chunks = split_json(doc_text)
+        # print(f"No. of Chunks: {len(doc_chunks)}")
+    except json.JSONDecodeError as e:
+        print(f"Error: {str(e)}")
+    return doc_chunks
+
+def read_csv(file_path, local=True):
+    '''
+    Reads CSV file
+    '''
+    doc_chunks = []
+    try:
+        doc_dict = {}
+        # Extract text
+        if local:
+            with open(file_path, mode='r', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                count = 1
+                for row in reader:
+                    doc_dict[f"row {count}"] = row
+                    count = count + 1
+        else:
+            reader = csv.DictReader(file_path)
+            count = 1
+            for row in reader:
+                doc_dict[f"row {count}"] = row
+                count = count + 1
+
+        # Split Text
+        doc_chunks = split_json(doc_dict)
+        # print(f"No. of Chunks: {len(doc_chunks)}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+    return doc_chunks
+
+def read_xlsx(file_path):
+    '''
+    Reads XLSX file
+    '''
+    doc_chunks = []
+    try:
+        doc_dict = {}
+        # Extract text
+        df = pd.read_excel(file_path, engine='openpyxl')
+        dict_data = df.to_dict(orient='records')
+        count = 1
+        for row in dict_data:
+            doc_dict[f"row {count}"] = row
+            count = count + 1
+
+        # Split Text
+        doc_chunks = split_json(doc_dict)
+        # print(f"No. of Chunks: {len(doc_chunks)}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+    return doc_chunks
+
 def index_local(src_directory, index_name):
 
     # Create Index
@@ -146,28 +303,27 @@ def index_local(src_directory, index_name):
         ext = filename.split(".")[-1]
         # print(f"\nFile: {filename}")
         
-        doc_text = " "
+        doc_chunks = []
 
         # Extract text
         if ext == "txt":
-            with open(files[i], "r") as file:
-                doc_text = file.read()
-        
+            doc_chunks = read_txt(files[i])
+            
         elif ext == "pdf":
-            reader = PdfReader(files[i])
-            doc_text = "\n".join([reader.pages[i].extract_text() for i in range(len(reader.pages))])
-        
+            doc_chunks = read_pdf(files[i])
+            
         elif ext == "docx":
-            doc = Document(files[i])
-            doc_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+            doc_chunks = read_docx(files[i])
 
-        #print(doc_text)
-        #print(len(doc_text))
+        elif ext == "json":
+            doc_chunks = read_json(files[i])
 
-        # Split Text
-        doc_chunks = split_text(doc_text)
-        # print(f"No. of Chunks: {len(doc_chunks)}")
+        elif ext == "csv":
+            doc_chunks = read_csv(files[i])
 
+        elif ext == "xlsx":
+            doc_chunks = read_xlsx(files[i])
+            
         # Insert text into Redis
         insert_index(filename, source, doc_chunks, index_name)
 
@@ -195,28 +351,29 @@ def index_azure(container_name, index_name):
         # print(f"\nFile: {filename}")
 
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=filename)
-        blob_data = blob_client.download_blob().readall()
+        file_data = blob_client.download_blob().readall()
         
-        doc_text = " "
+        doc_chunks = []
 
         # Extract text
         if ext == "txt":
-            doc_text = blob_data.decode('utf-8')
+            doc_chunks = read_txt(file_data, False)
         
-        elif ext == "pdf":
-            reader = PdfReader(io.BytesIO(blob_data))
-            doc_text = "\n".join([reader.pages[i].extract_text() for i in range(len(reader.pages))])
+        elif ext == "pdf": 
+            doc_chunks = read_pdf(io.BytesIO(file_data))
         
         elif ext == "docx":
-            doc = Document(io.BytesIO(blob_data))
-            doc_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+            doc_chunks = read_docx(io.BytesIO(file_data))
 
-        #print(doc_text)
-        #print(len(doc_text))
+        elif ext == "json":
+            doc_chunks = read_json(file_data, False)
 
-        # Split Text
-        doc_chunks = split_text(doc_text)
-        # print(f"No. of Chunks: {len(doc_chunks)}")
+        elif ext == "csv":
+            csv_data = blob_client.download_blob().content_as_text()
+            doc_chunks = read_csv(io.StringIO(csv_data), False)
+
+        elif ext == "xlsx":
+            doc_chunks = read_xlsx(io.BytesIO(file_data))
 
         # Insert text into Redis
         insert_index(filename, source, doc_chunks, index_name)
@@ -250,28 +407,28 @@ def index_aws(bucket_name, index_name):
         # print(f"\nFile: {filename}")
 
         response = s3_client.get_object(Bucket=bucket_name, Key=filename)
-        file_content = response['Body'].read()
+        file_data = response['Body'].read()
         
-        doc_text = " "
+        doc_chunks = []
 
         # Extract text
         if ext == "txt":
-            doc_text = file_content.decode('utf-8')
+            doc_chunks = read_txt(file_data, False)
         
         elif ext == "pdf":
-            reader = PdfReader(io.BytesIO(file_content))
-            doc_text = "\n".join([reader.pages[i].extract_text() for i in range(len(reader.pages))])
+            doc_chunks = read_pdf(io.BytesIO(file_data))
         
         elif ext == "docx":
-            doc = Document(io.BytesIO(file_content))
-            doc_text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+            doc_chunks = read_docx(io.BytesIO(file_data))
 
-        #print(doc_text)
-        #print(len(doc_text))
+        elif ext == "json":
+            doc_chunks = read_json(file_data, False)
 
-        # Split Text
-        doc_chunks = split_text(doc_text)
-        # print(f"No. of Chunks: {len(doc_chunks)}")
+        elif ext == "csv":
+            doc_chunks = read_csv(io.StringIO(file_data.decode("utf-8")), False)
+
+        elif ext == "xlsx":
+            doc_chunks = read_xlsx(io.BytesIO(file_data))
 
         # Insert text into Redis
         insert_index(filename, source, doc_chunks, index_name)

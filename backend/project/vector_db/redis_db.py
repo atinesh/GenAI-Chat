@@ -18,7 +18,7 @@ class RedisDB:
         """
 
         self.redis_conn = redis.Redis(host=cfg.REDIS_HOST, port=cfg.REDIS_PORT)
-        self.openai_client = OpenAI(api_key = os.environ['OPENAI_API_KEY'])
+        self.openai_client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
 
     def get_embedding(self, text):
         """
@@ -26,7 +26,7 @@ class RedisDB:
         """
         
         text = text.replace("\n", " ")
-        return self.openai_client.embeddings.create(input=[text], model=cfg .EMBEDDING_MODEL).data[0].embedding
+        return self.openai_client.embeddings.create(input=[text], model=cfg.EMBEDDING_MODEL).data[0].embedding
         
     def search_index(self, question, index_name):
         """

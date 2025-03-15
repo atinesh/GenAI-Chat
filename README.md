@@ -6,14 +6,19 @@ GenAI Chat is an intelligent question-answering chatbot designed to help users i
 Key Features:
 - Dynamic Knowledge Retrieval: It retrieve relevant documents from Redis Vector databases in real time, allowing them to respond with up-to-date and contextually accurate information.
 - Natural language understanding: It utilizes Large language models (LLMs). LLMs can analyze complex patterns in language and can accurately interpret subtle meanings, respond appropriately to diverse queries, and adapt to various conversational styles, significantly enhancing the quality of human-computer communication.
-- Multiple File Support: Project currently supports `.txt`, `.pdf` and `.docx` file formats (Support for `.pptx`, `.csv`, `.xlsx` and `.json` files will be coming in next release).
-- Multiple Data Source Support: Project supports 3 different sources for document indexing Local, `Azure` and `AWS`.
+- Multiple File Support: Project currently supports `.txt`, `.pdf`, `.docx`, `.json`, `.csv` and `.xlsx`.
+- Multiple Data Source Support: Project supports 3 different sources for document indexing `Local`, `Azure` and `AWS`.
 
 Technology Used:
 
 [![My Skills](https://skillicons.dev/icons?i=python,pytorch,flask,html,nginx,docker,redis,aws,azure,openai)](https://skillicons.dev)
 
 For more detailed explanation of this project, including its design and implementation, check out the accompanying [Medium blog post](https://atinesh.medium.com/building-a-retrieval-augmented-generation-rag-chatbot-9a86c5b05691).
+
+
+## 🚀 Updates
+- **[11-03-2025]**: Added support for `.json`, `.csv` and `.xlsx` files.
+- **[19-01-2025]**: Initial release of GenAI-Chat `v1.0`.
 
 ## 🔎 System Architecture
 
@@ -22,7 +27,7 @@ The chatbot consists of these core components:
 - **Frontend**: Takes user queries and sends them to the backend. It's built with HTML + JavaScript and is running in a **Docker** container with **Nginx**.
 - **Backend:** Takes user queries, fetches relevant documents from Redis Vector DB, builds prompts, and sends them to the LLM for generating response. Its built with **Flask** and is running in a **Docker** container.
 - **Redis Vector Database:** Stores the document text, embedding vectors and session data. It’s also running in a **Docker** container.
-- **OpenAI LLM**: Takes prompt and generates response. We will be using `gpt-4o` model for generating response and `text-embedding-3-small` model for generating embedding vectors (embedding dimension 1536). These models are hosted in cloud Chatbot makes API call in order to communicate with the models. These models can be updated in `backend/config.py`.
+- **OpenAI LLM**: Takes prompt and generates response. We will be using `gpt-4o` model for generating response and `text-embedding-3-large` model for generating embedding vectors (embedding dimension `3072`). These models are hosted in cloud Chatbot makes API call in order to communicate with the models. These models can be updated in `backend/config.py`.
 
 <img src="data_indexing/images/genai_chat.png" alt="GenAI Chat" width="800" style="border-radius: 10px;">
 
