@@ -1,87 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"> -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot Interface</title>
     <style>
+        :root {
+            --primary-bg: #f5f5f7;
+            --chat-bg: #f9f9f9;
+            --accent-color: #6b6b6b;
+            --highlight-color: #ebebeb;
+            --question-bg: #dadada;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Inter', Arial, sans-serif;
+            margin: 0;
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: var(--primary-bg);
+            color: #333;
+            line-height: 1.6;
         }
+        
         .container {
-            max-width: 800px;
-            margin: auto;
+            max-width: 850px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
         }
-        .chat-log {
-            /* border: 1px solid #ccc; */
-            padding: 10px;
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            margin-right: 15px;
+            font-weight: 600;
+            color: #666;
+            font-size: 28px;
+        }
+        
+        .header .robot-icon {
+            font-size: 32px;
+            color: var(--accent-color);
+        }
+        
+        .subtitle {
+            color: #666;
             margin-bottom: 20px;
-            background-color: #f9f9f9;
+            font-weight: 400;
+            font-size: 16px;
+        }
+        
+        .chat-log {
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: var(--chat-bg);
             height: 500px;
             overflow-y: auto;
-            position: relative; /* Add this line to make the chat-log relative */
+            position: relative;
             display: flex;
             flex-direction: column;
-            align-items: flex-start; /* Default alignment for other content */
-            /* border-radius: 10px; */
+            align-items: flex-start;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            scroll-behavior: smooth;
         }
+        
         .chat-log p {
-            margin: 5px 0;
+            margin: 8px 0;
         }
+        
         .chat-log .question {
-            background-color: #dadada;
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: inline-block; /* Make the background span only the text */
-            text-align: left;      /* Align text within the block */
-            font-size: 14px;
-            margin-left: auto;     /* Push the question to the right */
-            margin-right: 0;       /* No margin on the right */
-        }
-        .chat-log .answer {
-            /* background-color: #ffffff; */
-            padding: 5px;
+            background-color: var(--question-bg);
+            padding: 10px 15px;
+            border-radius: 18px 18px 0 18px;
             display: inline-block;
             text-align: left;
-            font-size: 14px;
+            font-size: 13px;
+            margin-left: auto;
+            margin-right: 0;
+            max-width: 80%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            word-break: break-word;
         }
+        
+        .chat-log .answer {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 18px 18px 18px 0;
+            display: inline-block;
+            text-align: left;
+            font-size: 13px;
+            max-width: 80%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            word-break: break-word;
+        }
+        
         .chat-log .source {
-            /* background-color: #ffffff; */
-            padding: 5px;
+            padding: 5px 10px;
             font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            margin-bottom: 15px;
         }
+        
         .highlight {
-            background-color: #ebebeb; /* Gold color for highlighting */
-            padding: 2px 6px; /* Padding for spacing inside the highlight */
-            border-radius: 6px; /* Rounded corners */
+            background-color: var(--highlight-color);
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
-
+        
+        .input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
         label {
             display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
+            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #444;
         }
-        input[type="text"], select {
+        
+        input[type="text"], select, textarea {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 15px;
+            transition: var(--transition);
+            font-family: 'Inter', Arial, sans-serif;
         }
+        
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(107, 107, 107, 0.1);
+        }
+        
         .loading {
-            text-align: left; /* Center the spinner */
-            margin-top: 10px; /* Move the spinner below the chat log */
+            text-align: left;
+            margin-top: 10px;
             display: none;
             width: 200px;
             font-size: 14px;
+            color: var(--accent-color);
+            align-items: center;
         }
+        
+        .loading i {
+            margin-left: 8px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 12px 18px;
+            font-size: 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn:hover {
+            background-color: #dcdcdc;
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5a5a5a;
+        }
+        
         .modal {
             display: none;
             position: fixed;
@@ -89,13 +219,33 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: var(--border-radius);
+            padding: 25px;
             z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 600px; /* Increased width */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 600px;
         }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #666;
+        }
+        
         .modal-overlay {
             display: none;
             position: fixed;
@@ -103,67 +253,82 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
             z-index: 999;
+            backdrop-filter: blur(3px);
         }
-        .modal label {
-            margin-top: 10px;
-        }
-        .modal button {
-            margin-top: 10px;
-        }
-        .btn {
-            background-color: light-gray;
-            padding: 12px 16px;
-            font-size: 14px;
-            border-radius: 8px; /* Added rounded corners */
-            cursor: pointer; /* Hand cursor on hover */
-        }
-        .btn:hover {
-            background-color: rgb(170, 170, 170);
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .modal {
+                width: 90%;
+                padding: 15px;
+            }
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
-        <h1>GenAI Chatbot    <i class='fas fa-robot' style='font-size:36px'></i></h1>
-        <h4>Ask me anything! I can assist you in finding answers from the documents.</h4>
+        <div class="header">
+            <h1>GenAI Chatbot</h1>
+            <i class="fas fa-robot robot-icon"></i>
+        </div>
+        <p class="subtitle">Ask me anything! I can assist you in finding answers from the documents.</p>
+        
         <div class="chat-log" id="chatLog">
             <!-- Chat log will appear here -->
         </div>
+        
         <div class="loading" id="loading">Processing Request <i class="fas fa-spinner fa-pulse"></i></div>
-        <br/>
-        <label for="question">Question:</label>
-        <input type="text" id="question" placeholder="Enter your question"><br/>
-        <button class="btn" onclick="submitQuestion()"><i class="fas fa-arrow-right"></i> Submit</button>
-        <button class="btn" onclick="clearChatLog()"><i class="fas fa-refresh"></i> Clear Chat</button>
-        <button class="btn" onclick="openSettings()"><i class="fas fa-gear"></i> Settings</button>
+        
+        <div class="input-container">
+            <label for="question">Question:</label>
+            <input type="text" id="question" placeholder="Enter your question" autofocus>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="submitQuestion()">
+                <i class="fas fa-arrow-right"></i> Submit
+            </button>
+            <button class="btn" onclick="clearChatLog()">
+                <i class="fas fa-refresh"></i> Clear Chat
+            </button>
+            <button class="btn" onclick="openSettings()">
+                <i class="fas fa-gear"></i> Settings
+            </button>
+        </div>
     </div>
 
     <div class="modal-overlay" id="modalOverlay"></div>
     <div class="modal" id="settingsModal">
-        <h2>Settings</h2>
+        <div class="modal-header">
+            <h2>Settings</h2>
+            <button class="close-btn" onclick="closeSettings()">×</button>
+        </div>
 
         <label for="objective">Objective:</label>
-        <textarea id="objective" style="width: 580px; font-size: 14px;" rows="5" placeholder="Enter the objective">You are an AI assistant that helps users by answering their questions. Use only the provided information to answer the question.</textarea>
+        <textarea id="objective" rows="5" placeholder="Enter the objective">You are an AI assistant that helps users by answering their questions. Use only the provided information to answer the question.</textarea>
 
         <label for="index">Index:</label>
-        <input type="text" id="index" style="width: 250px; font-size: 14px;" placeholder="Enter the index" value="test_index_1">
-
-        <label for="source">Source Filtering:</label>
-        <label for="source">
-            <input type="checkbox" id="smart_src_filter" name="smart_src_filter">
-            Smart Source Filtering
-        </label>
-        <label for="note" style="font-size: 12px; color: #969696;">Smart Source Filtering feature is experimental and may not always work as expected.</label>
+        <input type="text" id="index" placeholder="Enter the index" value="test_index_1">
         
         <label for="sessionId" style="visibility: hidden;">Session ID:</label>
-        <input type="text" id="sessionId" style="width: 250px; visibility: hidden;" placeholder="Enter the session ID" readonly>
-        <br/>
-      
-        <button class="btn" onclick="closeSettings()"><i class="fas fa-times"></i></button>
+        <input type="text" id="sessionId" style="visibility: hidden;" placeholder="Enter the session ID" readonly>
+        
+        <div class="button-group" style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="closeSettings()">
+                <i class="fas fa-check"></i> Save Settings
+            </button>
+        </div>
     </div>
 
     <script>
@@ -171,6 +336,7 @@
         const loadingIndicator = document.getElementById('loading');
         const settingsModal = document.getElementById('settingsModal');
         const modalOverlay = document.getElementById('modalOverlay');
+        const questionInput = document.getElementById('question');
 
         function generateSessionId() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
@@ -184,21 +350,25 @@
         }
 
         function submitQuestion() {
-            const question = document.getElementById('question').value;
+            const question = questionInput.value.trim();
+            
+            if (!question) return;
+            
             const objective = document.getElementById('objective').value;
             const index = document.getElementById('index').value;
             const sessionId = document.getElementById('sessionId').value;
-            const smart_src_filter = document.getElementById('smart_src_filter');
 
             const data = {
                 question: question,
                 objective: objective,
                 index: index,
-                session_id: sessionId,
-                smart_src_filter: smart_src_filter.checked
+                session_id: sessionId
             };
 
-            loadingIndicator.style.display = 'block';
+            loadingIndicator.style.display = 'flex';
+            
+            // Clear the input field
+            questionInput.value = '';
 
             fetch('http://localhost:8080/api/v1/chat', {
                 method: 'POST',
@@ -215,38 +385,61 @@
             .catch(error => {
                 loadingIndicator.style.display = 'none';
                 console.error('Error:', error);
+                
+                // Display error message in chat
+                const errorMessage = "Sorry, there was an error processing your request. Please try again.";
+                displayError(question, errorMessage);
             });
         }
 
         function displayChat(question, answer) {
             // Question 
             const questionElem = document.createElement('p');
-            questionElem.textContent = `${question}`;
+            questionElem.textContent = question;
             questionElem.className = 'question';
             chatLog.appendChild(questionElem);
             
+            // Try to extract source from the answer
+            const sourceMatch = answer.match(/\(SOURCE:\s*(.*?)\)/i);
+            const source = sourceMatch ? sourceMatch[1].trim() : '';
+            
+            // Extract answer text without source
+            const answerText = answer.replace(/\(SOURCE:.*?\)/i, '').trim().slice(1, -1);
+            
             // Answer
-            const answerText = answer.replace(/\[SOURCE:.*?\]/i, '').trim().slice(1, -1);
             const answerElem = document.createElement('p');
-            answerElem.textContent = `${answerText}`;
+            answerElem.textContent = answerText;
             answerElem.className = 'answer';
             chatLog.appendChild(answerElem);
 
-            // Source
-            const sourceMatch = answer.match(/\[SOURCE:\s*(.*?)\]/i);
-            const source = sourceMatch ? sourceMatch[1].trim() : 'Unknown';
- 
-            // Only show source if it's not "None"
-            if (source !== 'None' && source !== 'Unknown') {
+            // Only show source if it exists and is not "None"
+            if (source && source !== 'None') {
                 const sourceElem = document.createElement('p');
                 const sourceFiles = source.split('|').map(file => file.trim());
                 sourceElem.innerHTML = '<b>Source</b>: ' + sourceFiles.map(file => {
                     return `<span class="highlight">${file}</span>`;
-                }).join(' '); // Join filenames with a space
+                }).join(' ');
                 sourceElem.className = 'source';
                 chatLog.appendChild(sourceElem);
             }
 
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+        
+        function displayError(question, errorMessage) {
+            // Question 
+            const questionElem = document.createElement('p');
+            questionElem.textContent = question;
+            questionElem.className = 'question';
+            chatLog.appendChild(questionElem);
+            
+            // Error message
+            const errorElem = document.createElement('p');
+            errorElem.textContent = errorMessage;
+            errorElem.className = 'answer';
+            errorElem.style.color = '#d32f2f';
+            chatLog.appendChild(errorElem);
+            
             chatLog.scrollTop = chatLog.scrollHeight;
         }
 
@@ -264,10 +457,22 @@
             settingsModal.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
+        
+        // Handle Enter key press in the question input
+        questionInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitQuestion();
+            }
+        });
+        
+        // Close modal when clicking outside
+        modalOverlay.addEventListener('click', function() {
+            closeSettings();
+        });
 
         // Initialize session ID on page load
         document.addEventListener('DOMContentLoaded', initializeSession);
     </script>
-
 </body>
 </html>

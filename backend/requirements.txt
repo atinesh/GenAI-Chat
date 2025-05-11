@@ -8,5 +8,3 @@ numpy
 langchain
 langchain-community
 tiktoken
-sentence-transformers
-transformers

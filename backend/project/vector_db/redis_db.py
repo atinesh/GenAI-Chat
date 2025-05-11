@@ -50,14 +50,31 @@ class RedisDB:
             query_vector = np.array(self.get_embedding(question), dtype=np.float32).tobytes()
             
             # Create redis query
-            query = (
-                Query(f"(*)=>[KNN {cfg.TOP_K} @vector $vec AS vector_score]")
-                .sort_by("vector_score")
-                .return_fields("file_name", "chunk", "source", "tag", "content", "vector_score")
-                .dialect(2)
-            )
+            if cfg.INDEX_TYPE == "FLAT":
+                query = (
+                    Query(f"(*)=>[KNN {cfg.TOP_K} @vector $vec AS vector_score]")
+                    .sort_by("vector_score")
+                    .return_fields("file_name", "chunk", "source", "tag", "content", "vector_score")
+                    .dialect(2)
+                )
+                query_params = {
+                    "vec": query_vector
+                }
+            elif cfg.INDEX_TYPE == "HNSW":
+                query = (
+                    Query(f"(*)=>[KNN {cfg.TOP_K} @vector $vec EF_RUNTIME $ef AS vector_score]")
+                    .sort_by("vector_score")
+                    .return_fields("file_name", "chunk", "source", "tag", "content", "vector_score")
+                    .dialect(2)
+                )
+                query_params = {
+                    "vec": query_vector, 
+                    "ef": cfg.EF_RUNTIME
+                }
+            else:
+                raise ValueError("Invalid Index Type Passed")
+
             # Search index
-            query_params = {"vec": query_vector}
             result = self.redis_conn.ft(index_name).search(query, query_params).docs
 
         except Exception as e:

@@ -1,6 +1,8 @@
 REDIS_HOST = "redis-stack"            
 # REDIS_HOST = "localhost"          # LOCAL TESTING
 REDIS_PORT = 6379
+INDEX_TYPE = "FLAT"                 # Vector index types - FLAT or HNSW
+EF_RUNTIME = 8                      # Increase for higher recall under HNSW
 SESSION_EXPIRATION = 900            # Session data to be removed from Redis after 900 secs / 15 mins
 TOKEN_LIMIT = 5000                  # Maximum token limit
 TOP_K = 2                           # Top K documents to be fetched from Redis
