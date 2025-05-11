@@ -3,6 +3,3 @@
 
 # Ignore redis dump
 *.rdb
-
-# Ignore model file
-backend/model/model.safetensors

@@ -11,12 +11,13 @@ Key Features:
 
 Technology Used:
 
-[![My Skills](https://skillicons.dev/icons?i=python,pytorch,flask,html,nginx,docker,redis,aws,azure,openai)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=python,flask,html,nginx,docker,redis,aws,azure,openai)](https://skillicons.dev)
 
 For more detailed explanation of this project, including its design and implementation, check out the accompanying [Medium blog post](https://atinesh.medium.com/building-a-retrieval-augmented-generation-rag-chatbot-9a86c5b05691).
 
 
 ## 🚀 Updates
+- **[11-05-2025]**: Added support for HNSW (Hierarchical Navigable Small World) Redis vector indexing and new improved user interface.
 - **[11-03-2025]**: Added support for `.json`, `.csv` and `.xlsx` files.
 - **[19-01-2025]**: Initial release of GenAI-Chat `v1.0`.
 
@@ -53,14 +54,21 @@ $ git clone https://github.com/atinesh-s/GenAI-Chat.git
 OPENAI_API_KEY=key
 ```
 
-**Step 4**: Create a `data` directory in the project root if it doesn't already exist. This directory will be used to store the Redis dump file.
+**Step 4**: Configure Vector index types (FLAT or HNSW) in `data_indexing/data_indexing.py` and `backend/config.py`.
+
+- Choose the `FLAT` index type when you have small datasets (< 1M vectors) or when search accuracy is more important than search latency.
+- Choose the `HNSW` (Hierarchical Navigable Small World) index type when you have larger datasets (> 1M documents) or when search performance and scalability are more important than search accuracy.
+
+> Note: For `HNSW` index type optionally adjust `EF_RUNTIME` (Higher values increase accuracy, but also increase search latency.)
+
+https://redis.io/docs/latest/develop/interact/search-and-query/advanced-concepts/vectors/
+
+**Step 5**: Create a `data` directory in the project root if it doesn't already exist. This directory will be used to store the Redis dump file.
 
 ```
 $ cd GenAI-Chat
 $ mkdir data
 ```
-
-**Step 5**: Download the `model.safetensors` file from this [link](https://www.dropbox.com/scl/fi/310abl0pqs0hcxmqmiz70/model.safetensors?rlkey=yadhs2nemgt2lsighd1oufd2g&st=d9txrq8d&dl=0) and place it in the `backend/model` directory.
 
 **Step 6**: Build Images and Run Containers
 

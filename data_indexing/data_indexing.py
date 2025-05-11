@@ -50,6 +50,8 @@ EMBEDDING_DIMENSIONS = 3072                 # Embedding dimensions
 CHUNK_SIZE = 5000                           # Maximum number of characters in each chunk 
                                             # 5000 characters ~ 800 Words ~ 1000 Tokens
 CHUNK_OVERLAP = 200                         # Overlap between chunks
+INDEX_TYPE = "FLAT"                         # Vector index types - FLAT or HNSW
+EF_RUNTIME = 8                              # Increase for higher recall under HNSW
 
 # Helper Functions
 def get_embedding(text):
@@ -111,21 +113,44 @@ def create_index(index_name):
         print("Index already exists!")
     except:
         # schema
-        schema = (
-            TextField("index_name"),               # Text Field
-            TextField("file_name"),                # Text Field
-            TextField("chunk"),                    # Text Field
-            TextField("content"),                  # Text Field
-            TextField("source"),                   # Text Field
-            TagField("tag"),                       # Tag Field Name
-            VectorField("vector",                  # Vector Field Name
-                "FLAT", {                          # Vector Index Type: FLAT or HNSW
-                    "TYPE": "FLOAT32",             # FLOAT32 or FLOAT64
-                    "DIM": EMBEDDING_DIMENSIONS,   # Number of Vector Dimensions
-                    "DISTANCE_METRIC": "COSINE",   # Vector Search Distance Metric
-                }
-            ),
-        )
+        if INDEX_TYPE == "FLAT":
+            schema = (
+                TextField("index_name"),                # Text Field
+                TextField("file_name"),                 # Text Field
+                TextField("chunk"),                     # Text Field
+                TextField("content"),                   # Text Field
+                TextField("source"),                    # Text Field
+                TagField("tag"),                        # Tag Field Name
+                VectorField("vector",                   # Vector Field Name
+                    "FLAT", {                           # Vector Index Type: FLAT
+                        "TYPE": "FLOAT32",              # FLOAT32 or FLOAT64
+                        "DIM": EMBEDDING_DIMENSIONS,    # Vector Dimensions
+                        "DISTANCE_METRIC": "COSINE",    # Vector Search Distance Metric
+                    }
+                ),
+            )
+        elif INDEX_TYPE == "HNSW":
+            schema = (
+                TextField("index_name"),                # Text Field
+                TextField("file_name"),                 # Text Field
+                TextField("chunk"),                     # Text Field
+                TextField("content"),                   # Text Field
+                TextField("source"),                    # Text Field
+                TagField("tag"),                        # Tag Field Name
+                VectorField("vector",                   # Vector Field Name
+                    "HNSW", {                           # Vector Index Type: HNSW
+                        "TYPE": "FLOAT32",              # FLOAT32 or FLOAT64
+                        "DIM": EMBEDDING_DIMENSIONS,    # Vector Dimensions
+                        "DISTANCE_METRIC": "COSINE",    # Vector Search Distance Metric
+                        "M": 16,                        # Controls graph connectivity (default 16)
+                        "EF_CONSTRUCTION": 200,         # Controls index-time accuracy (default 200)
+                        "EF_RUNTIME": EF_RUNTIME,       # Controls query-time candidates (default 10)
+                        "EPSILON": 0.01                 # Range-query tolerance (default 0.01)
+                    }
+                ),
+            )
+        else:
+            raise ValueError("Invalid Index Type Passed")
 
         # index Definition
         definition = IndexDefinition(prefix=[DOC_PREFIX], index_type=IndexType.HASH)
