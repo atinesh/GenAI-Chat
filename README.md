@@ -40,7 +40,7 @@ Follow below steps in either on Mac and Linux (Ubuntu) machine.
 
 **Step 2**: Clone the repository
 ```
-$ git clone https://github.com/atinesh-s/GenAI-Chat.git
+$ git clone https://github.com/atinesh/GenAI-Chat.git
 ```
 
 **Step 3**: Configure OpenAI credentials
@@ -90,10 +90,10 @@ If you found this repository helpful, please consider giving it a **star** ⭐ t
 <a href='https://ko-fi.com/J3J4196KY7' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 ### 🐛 Found a Bug?  
-If you encounter any issues, please [open an issue](https://github.com/atinesh-s/GenAI-Chat/issues) with detailed steps to reproduce the problem. I’ll look into it as soon as possible.
+If you encounter any issues, please [open an issue](https://github.com/atinesh/GenAI-Chat/issues) with detailed steps to reproduce the problem. I’ll look into it as soon as possible.
 
 ### 💡 Have a Feature Request?  
-I’m always looking to improve this project! If you have suggestions for new features or enhancements, feel free to [submit a feature request](https://github.com/atinesh-s/GenAI-Chat/issues).
+I’m always looking to improve this project! If you have suggestions for new features or enhancements, feel free to [submit a feature request](https://github.com/atinesh/GenAI-Chat/issues).
 
 ---
 
