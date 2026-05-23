@@ -1,5 +1,27 @@
-# Ignore environment files
+# Environment files (keep .env.example checked in)
 .env
+.env.local
+.env.*.local
+!.env.example
 
-# Ignore redis dump
-*.rdb
+# Local corpus (user documents to be indexed — not source)
+data_indexing/corpus/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+.venv/
+venv/
+genai-env/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
