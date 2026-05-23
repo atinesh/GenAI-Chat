@@ -1,0 +1,42 @@
+# Keep build context lean and avoid leaking host artifacts into images.
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# VCS / tooling
+.git/
+.gitignore
+.dockerignore
+.claude/
+.vscode/
+.idea/
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+.venv/
+venv/
+genai-env/
+
+# Runtime data
+data/                   # Redis dump volume (mounted at runtime)
+data_indexing/corpus/   # Local documents (mounted into data_indexing at runtime if needed)
+*.rdb
+*.log
+
+# Docs / images not needed at runtime
+images/
+README.md
+*/README.md
+LICENSE
+
+# Local test artifacts
+.pytest_cache/
+.coverage
+htmlcov/

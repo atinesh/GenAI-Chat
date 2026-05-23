@@ -28,4 +28,18 @@ fi
 
 ### Deploy the containers
 echo "Deploying the containers"
-docker-compose up -d
+
+# Prefer Docker Compose v2 (`docker compose`); fall back to the legacy
+# standalone `docker-compose` binary for older Docker installations.
+if docker compose version > /dev/null 2>&1; then
+    COMPOSE="docker compose"
+elif command -v docker-compose > /dev/null 2>&1; then
+    COMPOSE="docker-compose"
+else
+    echo "Error: neither 'docker compose' (v2) nor 'docker-compose' (v1) is available."
+    echo "Install Docker Desktop or the docker-compose-plugin and re-run."
+    exit 1
+fi
+
+echo "Using: ${COMPOSE}"
+${COMPOSE} up -d

@@ -2,8 +2,8 @@ FROM python:3.11-slim-bullseye
 
 # Set metadata
 ENV PROJECT_NAME="GenAI Chat"
-ENV VERSION="1.2"
-ENV BUILD_DATE="11-05-2025"
+ENV VERSION="1.3"
+ENV BUILD_DATE="23-05-2026"
 ENV MAINTAINER="Atinesh Singh <atinesh.s@gmail.com>"
 
 WORKDIR /app

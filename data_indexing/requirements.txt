@@ -1,6 +1,8 @@
 langchain
 langchain-community
+langchain-text-splitters
 pypdf
+pymupdf4llm
 python-docx
 openai
 numpy
@@ -8,3 +10,4 @@ pandas
 openpyxl
 redis
 tqdm
+tiktoken
